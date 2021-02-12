@@ -4,6 +4,7 @@ const express = require('express');
 const path = require('path');
 let notes = require("./db/db.json");
 const fs = require('fs');
+const uuid = require('uuid');
 
 // Sets up the Express App
 
@@ -43,7 +44,7 @@ app.post("/api/notes", function (req, res) {
     // parse the data to get an array of objects
     notes = JSON.parse(notes);
     // Set new notes id
-    req.body.id = notes.length;
+    req.body.id = uuid.v4();
     // add the new note to the array of note objects
     notes.push(req.body); // req.body - user input
     // make it string(stringify)so you can write it to the file
