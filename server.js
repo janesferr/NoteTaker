@@ -2,6 +2,8 @@
 
 const express = require('express');
 const path = require('path');
+let notes = require("./db/db.json");
+const fs = require('fs');
 
 // Sets up the Express App
 
@@ -13,23 +15,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(express.static("public"));
-// Star Wars Characters (DATA)
 
-let notes = [
-    {
-        "title":"Test Title",
-        "text":"Test text"
-    }
-]
+
+
 
 // Routes
-app.use("/public", express.static('./public/'));
 // Basic route that sends the user first to the AJAX Page
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, './public/index.html')));
 
 app.get('/notes', (req, res) => res.sendFile(path.join(__dirname, './public/notes.html')));
-
-app.post('/public', (req, res) => res.sendFile(path.join(__dirname, './public/assets/js/index/js')));
 
 
 // // Displays all characters
@@ -38,79 +32,71 @@ app.get('/api/notes', (req, res) => res.json(notes));
 
 
 
-// // Displays a single character, or returns false
-// app.get('/api/characters/:character', (req, res) => {
-//   const chosen = req.params.character;
 
-//   console.log(chosen);
 
-//   /* Check each character routeName and see if the same as "chosen"
-//    If the statement is true, send the character back as JSON,
-//    otherwise tell the user no character was found */
+app.post("/api/notes", function (req, res) {
+  try {
+    // reads the json file
+    notes = fs.readFileSync("db/db.json", "utf8");
+    console.log(notes);
 
-//   for (let i = 0; i < characters.length; i++) {
-//     if (chosen === characters[i].routeName) {
-//       return res.json(characters[i]);
-//     }
-//   }
+    // parse the data to get an array of objects
+    notes = JSON.parse(notes);
+    // Set new notes id
+    req.body.id = notes.length;
+    // add the new note to the array of note objects
+    notes.push(req.body); // req.body - user input
+    // make it string(stringify)so you can write it to the file
+    notes = JSON.stringify(notes);
 
-//   return res.json(false);
-// });
-app.get('/api/notes/:id', (req, res) => {
-  const chosen = req.params.character;
+    // writes the new note to file
+    fs.writeFile("./db/db.json", notes, "utf8", function (err) {
+      // error handling
 
-  console.log(chosen);
 
-  /* Check each character routeName and see if the same as "chosen"
-   If the statement is true, send the character back as JSON,
-   otherwise tell the user no character was found */
-
-  for (let i = 0; i < notes.length; i++) {
-    if (chosen === notes[i].routeName) {
-      return res.json(notes[i]);
-    }
-  }
-
-  return res.json(false);
-});
-
-// // Create New Characters - takes in JSON input
-// app.post('/api/characters', (req, res) => {
-//   // req.body hosts is equal to the JSON post sent from the user
-//   // This works because of our body parsing middleware
-//   const newCharacter = req.body;
-
-//   // Using a RegEx Pattern to remove spaces from newCharacter
-//   // You can read more about RegEx Patterns later https://www.regexbuddy.com/regex.html
-//   newCharacter.routeName = newCharacter.name.replace(/\s+/g, '').toLowerCase();
-//   console.log(newCharacter);
-
-//   characters.push(newCharacter);
-//   res.json(newCharacter);
-// });
-// app.post('/api/notes', (req, res) => res.json(notes));
-app.post('/api/notes', (req, res) => {
-  // req.body hosts is equal to the JSON post sent from the user
-  // This works because of our body parsing middleware
-  let note = req.body;
-
-  console.log(note);
-
-  // We then add the json the user sent to the character array
-  notes.push(note);
-
-  // We then display the JSON to the users
-  res.json(note);
-});
-
-app.post('/api/notes/:id', (req, res) => {
-    let id = req.params.id;
-    delete note[id];
-   console.log(notes);
-
+      if (err) throw err;
+      notes = JSON.parse(notes);
+      res.json(notes);
+    });
     
-    res.json({ ok: true});
- });
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+});
+
+// Delete a note
+
+app.delete("/api/notes/:id", function (req, res) {
+  try {
+    //  reads the json file
+    notes = fs.readFileSync("./db/db.json", "utf8");
+
+    // parse the data to get an array of the objects
+    notes = JSON.parse(notes);
+
+    // delete the old note from the array on note objects
+    notes = notes.filter(function (note) {
+      return note.id != req.params.id;
+    });
+
+    // make it string(stringify)so you can write it to the file
+    notes = JSON.stringify(notes);
+    // write the new notes to the file
+    fs.writeFile("./db/db.json", notes, "utf8", function (err) {
+      // error handling
+      if (err) throw err;
+      notes = JSON.parse(notes);
+      res.json(notes);
+    });
+
+    // error handling
+  } catch (err) {
+
+    console.log(err);
+    throw err;
+  }
+});
 
 
 // Starts the server to begin listening
