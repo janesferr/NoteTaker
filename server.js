@@ -11,15 +11,19 @@ const PORT = process.env.PORT || 3000;
 // Sets up the Express app to handle data parsing
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
+const uuid = require('uuid');
 app.use(express.static("public"));
 // Star Wars Characters (DATA)
 
 let notes = [
-    {
-        "title":"Test Title",
-        "text":"Test text"
-    }
+  {
+    "title":"Call bank on Friday",
+    "text":"Friday is our day off"
+},
+{
+    "title":"Reschedule Delivery",
+    "text":"Deliver Food"
+}
 ]
 
 // Routes
@@ -37,25 +41,6 @@ app.post('/public', (req, res) => res.sendFile(path.join(__dirname, './public/as
 app.get('/api/notes', (req, res) => res.json(notes));
 
 
-
-// // Displays a single character, or returns false
-// app.get('/api/characters/:character', (req, res) => {
-//   const chosen = req.params.character;
-
-//   console.log(chosen);
-
-//   /* Check each character routeName and see if the same as "chosen"
-//    If the statement is true, send the character back as JSON,
-//    otherwise tell the user no character was found */
-
-//   for (let i = 0; i < characters.length; i++) {
-//     if (chosen === characters[i].routeName) {
-//       return res.json(characters[i]);
-//     }
-//   }
-
-//   return res.json(false);
-// });
 app.get('/api/notes/:id', (req, res) => {
   const chosen = req.params.character;
 
@@ -74,21 +59,6 @@ app.get('/api/notes/:id', (req, res) => {
   return res.json(false);
 });
 
-// // Create New Characters - takes in JSON input
-// app.post('/api/characters', (req, res) => {
-//   // req.body hosts is equal to the JSON post sent from the user
-//   // This works because of our body parsing middleware
-//   const newCharacter = req.body;
-
-//   // Using a RegEx Pattern to remove spaces from newCharacter
-//   // You can read more about RegEx Patterns later https://www.regexbuddy.com/regex.html
-//   newCharacter.routeName = newCharacter.name.replace(/\s+/g, '').toLowerCase();
-//   console.log(newCharacter);
-
-//   characters.push(newCharacter);
-//   res.json(newCharacter);
-// });
-// app.post('/api/notes', (req, res) => res.json(notes));
 app.post('/api/notes', (req, res) => {
   // req.body hosts is equal to the JSON post sent from the user
   // This works because of our body parsing middleware
@@ -102,15 +72,58 @@ app.post('/api/notes', (req, res) => {
   // We then display the JSON to the users
   res.json(note);
 });
+app.post('/api/notes/', (req, res) => {
+  res.send(req.body);
+  const newNotes = {
+      id: uuid.v4(),
+      title:req.body.title,
+      text:req.body.text,
+      status: 'active'
+  }
+  if (!newNotes.title || !newNotes.text) {
+      return res.status(400).json({ msg: 'Please include a title and text' });
+  }
+  //if you have a database you use
+  //members.save(newMember)
+  notes.push(newNotes);
+  res.json(notes);
 
-app.post('/api/notes/:id', (req, res) => {
-    let id = req.params.id;
-    delete note[id];
-   console.log(notes);
+});
 
-    
-    res.json({ ok: true});
- });
+app.put('/api/notes/:id', (req, res) => {
+  const found = notes.some(notes => notes.id === parseInt(req.params.id));
+  if (found) {
+      const updMember = req.body;
+      notes.forEach(member => {
+          if (notes.id === parseInt(req.params.id)) {
+             notes.title = updMember.title ? updMember.title : notes.title;
+             notes.text = updMember.text ? updMember.text : notes.text;
+
+              res.json({ msg: 'Member updated', member })
+          }
+      });
+  }
+  else {
+      res.status(400).json({ msg: `No member with the id of ${req.params.id}` });
+  }
+});
+app.delete('/api/notes/:id', (req, res) => {
+  const found = notes.some(notes => notes.id === parseInt(req.params.id));
+  if (found) {
+      res.json({
+          msg: 'notes deleted', 
+          notes: notes.filter(notes => notes.id !== parseInt(req.params.id))
+  });
+}
+  else {
+      res.status(400).json({ msg: `No notes with the id of ${req.params.id}` });
+  }
+});
+app.delete("/api/notes/:id", function(req, res) {
+  notes.splice(req.params.id, 1);
+  updateDb();
+  console.log("Deleted note with id "+req.params.id);
+});
 
 
 // Starts the server to begin listening
