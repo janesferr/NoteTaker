@@ -15,25 +15,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(express.static("public"));
-// Star Wars Characters (DATA)
 
-// let notes = [
-//     {
-//         "title":"Test Title",
-//         "text":"Test text"
-//     }
-// ]
-fs.writeFileSync(path.resolve(__dirname, './db/db.json'), JSON.stringify(notes));
+
 
 
 // Routes
-app.use("/public", express.static('./public/'));
 // Basic route that sends the user first to the AJAX Page
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, './public/index.html')));
 
 app.get('/notes', (req, res) => res.sendFile(path.join(__dirname, './public/notes.html')));
-
-app.post('/public', (req, res) => res.sendFile(path.join(__dirname, './public/assets/js/index/js')));
 
 
 // // Displays all characters
@@ -43,61 +33,69 @@ app.get('/api/notes', (req, res) => res.json(notes));
 
 
 
-app.get('/api/notes/:id', (req, res) => {
-  const chosen = req.params.character;
 
-  console.log(chosen);
+app.post("/api/notes", function (req, res) {
+  try {
+    // reads the json file
+    notes = fs.readFileSync("db/db.json", "utf8");
+    console.log(notes);
 
-  /* Check each character routeName and see if the same as "chosen"
-   If the statement is true, send the character back as JSON,
-   otherwise tell the user no character was found */
+    // parse the data to get an array of objects
+    notes = JSON.parse(notes);
+    // Set new notes id
+    req.body.id = notes.length;
+    // add the new note to the array of note objects
+    notes.push(req.body); // req.body - user input
+    // make it string(stringify)so you can write it to the file
+    notes = JSON.stringify(notes);
 
-  for (let i = 0; i < notes.length; i++) {
-    if (chosen === notes[i].routeName) {
-      return res.json(notes[i]);
-    }
-  }
+    // writes the new note to file
+    fs.writeFile("./db/db.json", notes, "utf8", function (err) {
+      // error handling
 
-  return res.json(false);
-  // const found = notes.some(notes => notes.id === parseInt(req.params.id));
-  // if(found){
-  //   res.json(notes.filter(notes => notes.id ===parseInt(req.params.id)));
 
-  // }else{
-  //   res.status(400).json({msg: `No member with teh id of ${req.params.id}`});
-  // }
-});
-// app.post('/api/notes/', (req, res) => res.json(notes));
-
-app.post('/api/notes/:id', (req, res) => {
-  // req.body hosts is equal to the JSON post sent from the user
-  // This works because of our body parsing middleware
-  let note = req.body;
-
-  console.log(note);
-
-  // We then add the json the user sent to the character array
-  notes.push(note);
-
-  // We then display the JSON to the users
-  res.json(note);
-});
-
-app.delete('/api/notes/:id', (req, res) => {
-  //   let id = req.params.id;
-  //   if(delete notes.id){
-  //       res.json(notes.id);
-  //   }
-  //  console.log(notes);
-
+      if (err) throw err;
+      notes = JSON.parse(notes);
+      res.json(notes);
+    });
     
-    // res.json({ ok: true});
-    // res.json(notes);
-// for(let i = 0; i <notes.length; i++){
-//     if(notes[i].id === key){
-//         notes.splice(i,1);
-//     }
-// }
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+});
+
+// Delete a note
+
+app.delete("/api/notes/:id", function (req, res) {
+  try {
+    //  reads the json file
+    notes = fs.readFileSync("./db/db.json", "utf8");
+
+    // parse the data to get an array of the objects
+    notes = JSON.parse(notes);
+
+    // delete the old note from the array on note objects
+    notes = notes.filter(function (note) {
+      return note.id != req.params.id;
+    });
+
+    // make it string(stringify)so you can write it to the file
+    notes = JSON.stringify(notes);
+    // write the new notes to the file
+    fs.writeFile("./db/db.json", notes, "utf8", function (err) {
+      // error handling
+      if (err) throw err;
+      notes = JSON.parse(notes);
+      res.json(notes);
+    });
+
+    // error handling
+  } catch (err) {
+
+    console.log(err);
+    throw err;
+  }
 });
 
 
