@@ -1,17 +1,1 @@
-[
-    {
-        "title": "asdfasdf",
-        "text": "asdfasdfsadff",
-        "id": 0
-    },
-    {
-        "title": "asdfasdf",
-        "text": "asdfasdfsadf",
-        "id": 1
-    },
-    {
-        "title": "asdfsadf",
-        "text": "asdfsdf",
-        "id": "da19f772-3d86-4a23-b9ea-4ce41fac9f30"
-    }
-]
+[{"title":"Call bank on Friday","text":"Call because you will be late on payments","id":"c8669a84-34c8-4a07-8ad4-eb6d84cce427"},{"title":"Reschedule delivery","text":"Your lunch will be late otherwise","id":"5873e6cf-e443-47a2-91bd-5934a88145d1"}]
