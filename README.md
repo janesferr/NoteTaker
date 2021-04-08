@@ -64,8 +64,8 @@ The following API routes should be created:
 
 ## Installation and Requirements:
 
-node.js
-express.js
+* node.js
+* express.js
 
 You have to type npm install on your terminal to make this work and then enter node server.js to run the code.
 You can also have nodemom run the localhost with npm run watch to continue watching the information get changed and run. 
