@@ -3,9 +3,8 @@
 ## Description
 This application will use an Express.js back end and will save and retrieve note data from a JSON file.
 
-The application has been deployed to Heroku.
-
-https://floating-earth-41185.herokuapp.com/
+The application has been deployed to Vercel:
+https://note-taker-git-main-janes-projects-0bf41b0f.vercel.app/
 
 
 ## User Story
